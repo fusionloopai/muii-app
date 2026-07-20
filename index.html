@@ -89,6 +89,7 @@ main{max-width:1180px;margin:0 auto;padding:clamp(20px,4vw,44px) clamp(16px,4vw,
 .pill-due{background:var(--danger-tint);color:var(--danger)}
 .pill-little{background:var(--tint-blue);color:#00B4FF}
 .pill-big{background:var(--tint-peach);color:#FF9F2E}
+.pill-unset{background:transparent;color:var(--ink-4);border:1px dashed var(--line-2)}
 .progressbar{height:6px;border-radius:99px;background:var(--surface-3);overflow:hidden}
 .progressbar i{display:block;height:100%;background:var(--fl-gradient);border-radius:99px;transition:width .35s ease-out}
 .dcard .title{font:600 1.12rem/1.3 var(--font-display)}
@@ -150,6 +151,7 @@ main{max-width:1180px;margin:0 auto;padding:clamp(20px,4vw,44px) clamp(16px,4vw,
 .seg{display:inline-flex;border:1.5px solid var(--line-2);border-radius:var(--r-pill);overflow:hidden;flex:none}
 .seg button{padding:5px 13px;font-size:.78rem;font-weight:600;color:var(--ink-3)}
 .seg button.on{background:var(--ink);color:var(--surface)}
+.seg button.unset{background:transparent;color:var(--ink-4);font-style:italic}
 .info{position:relative;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--ink-4);color:var(--ink-3);font:700 .68rem/1 var(--font-display);cursor:help;vertical-align:middle;margin-left:6px}
 .info .tip{display:none;position:absolute;bottom:24px;left:50%;transform:translateX(-50%);width:290px;background:var(--surface-3);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:12px 14px;font:400 .82rem/1.55 var(--font-body);color:var(--ink-2);box-shadow:var(--shadow-lg);z-index:20;text-align:left;text-transform:none;letter-spacing:0}
 .info:hover .tip,.info:focus .tip{display:block}
@@ -671,7 +673,7 @@ const OUTCOME_PROMPTS = ['An experience I want', 'A thing I want', 'Who I want a
 function stepOutcomes(d) {
   return `
   <h2 class="h2">What do you want?</h2>
-  <span class="small">Every outcome you’re hoping this decision serves. Tag each one Now, Next, or Later.<span class="info" tabindex="0">i<span class="tip"><b>Now</b> — the priority. What this season of your life needs handled.<br><b>Next</b> — the transition. What you’re building toward once Now is taken care of.<br><b>Later</b> — the long game. The big dreams you’re keeping alive on purpose.</span></span></span>
+  <span class="small">Every outcome you’re hoping this decision serves. Tag each one Now, Next, or Later — new outcomes start unsorted until you decide.<span class="info" tabindex="0">i<span class="tip"><b>Unsorted</b> — you haven’t placed it yet. Sit with it before you decide.<br><b>Now</b> — the priority. What this season of your life needs handled.<br><b>Next</b> — the transition. What you’re building toward once Now is taken care of.<br><b>Later</b> — the long game. The big dreams you’re keeping alive on purpose.</span></span></span>
   <div class="chips">${OUTCOME_PROMPTS.map(p => `<button class="chip" onclick="promptOutcome('${esc(p)}')">${p}</button>`).join('')}</div>
   <form class="bigadd" onsubmit="return addOutcome(event)">
     <input type="text" name="text" id="outcome-in" placeholder="I want…">
@@ -683,7 +685,8 @@ function stepOutcomes(d) {
       <div class="row">
         <span class="txt">${esc(o.text)}</span>
         <span class="seg">
-          <button class="${o.horizon !== 'later' && o.horizon !== 'next' ? 'on' : ''}" onclick="setHorizon('${o.id}','now')">Now</button>
+          <button class="${!o.horizon ? 'on unset' : ''}" onclick="setHorizon('${o.id}',null)">&mdash;</button>
+          <button class="${o.horizon === 'now' ? 'on' : ''}" onclick="setHorizon('${o.id}','now')">Now</button>
           <button class="${o.horizon === 'next' ? 'on' : ''}" onclick="setHorizon('${o.id}','next')">Next</button>
           <button class="${o.horizon === 'later' ? 'on' : ''}" onclick="setHorizon('${o.id}','later')">Later</button>
         </span>
@@ -701,13 +704,13 @@ function addOutcome(e) {
   const v = e.target.text.value.trim();
   if (v) {
     const d = findD(route.decisionId);
-    d.outcomes.push({ id: uid(), text: v, reason: '', horizon: 'now' });
+    d.outcomes.push({ id: uid(), text: v, reason: '', horizon: null });
     save(); render(); focusFirst();
   }
   return false;
 }
 function horizonPill(o) {
-  const h = o.horizon === 'later' ? ['pill-big', 'Later'] : o.horizon === 'next' ? ['pill-open', 'Next'] : ['pill-little', 'Now'];
+  const h = o.horizon === 'later' ? ['pill-big', 'Later'] : o.horizon === 'next' ? ['pill-open', 'Next'] : o.horizon === 'now' ? ['pill-little', 'Now'] : ['pill-unset', 'Unsorted'];
   return `<span class="pill ${h[0]}">${h[1]}</span>`;
 }
 function setHorizon(id, h) {

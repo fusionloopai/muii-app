@@ -302,6 +302,14 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 const STORE_KEY = 'muii-v1';
 const uid = () => Math.random().toString(36).slice(2, 10);
 const today = () => new Date().toISOString().slice(0, 10);
+const nowStamp = () => new Date().toISOString();
+function fmtStamp(iso) {
+  const d = new Date(iso);
+  const datePart = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const timePart = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).replace(' ', '').toLowerCase();
+  const tzPart = d.toLocaleTimeString('en-US', { timeZoneName: 'short' }).split(' ').pop();
+  return `${datePart} — ${timePart} ${tzPart}`;
+}
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 function blankState() {
@@ -531,7 +539,7 @@ function renderTrim() {
         <span class="grip" style="cursor:default"><i class="ph ph-scissors"></i></span>
         <span class="txt" style="display:flex;flex-direction:column;gap:5px">
           <input class="line-edit" type="text" value="${esc(t.text)}" oninput="upTrimText('${t.id}',this.value)">
-          <span class="small">${t.from ? `from “${esc(t.from)}” · ${t.date}` : t.date}</span>
+          <span class="small">${t.from ? `from “${esc(t.from)}” · ${fmtStamp(t.date)}` : fmtStamp(t.date)}</span>
         </span>
         <button class="iconbtn danger" onclick="removeTrim('${t.id}')"><i class="ph ph-x"></i></button>
       </div>`).join('')}</div>` : '<p class="small" style="margin-top:14px">Nothing trimmed yet.</p>'}
@@ -544,7 +552,7 @@ function renderTrim() {
 function addTrim(e) {
   e.preventDefault();
   const v = e.target.text.value.trim();
-  if (v) { state.trims.unshift({ id: uid(), text: v, from: null, date: today() }); save(); render(); }
+  if (v) { state.trims.unshift({ id: uid(), text: v, from: null, date: nowStamp() }); save(); render(); }
   return false;
 }
 function upTrimText(id, v) {
@@ -1051,7 +1059,7 @@ function commitDecision() {
   d.status = 'resolved';
   // unchosen options → the Trim list
   d.options.filter(o => o.id !== d.resolution.optionId).forEach(o => {
-    state.trims.unshift({ id: uid(), text: o.text, from: d.title, date: today() });
+    state.trims.unshift({ id: uid(), text: o.text, from: d.title, date: nowStamp() });
   });
   // "later" outcomes → Target horizon list (dedup by text)
   d.outcomes.filter(o => o.horizon === 'later').forEach(o => {

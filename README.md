@@ -1,6 +1,6 @@
-# Metoxi
+# Muii
 
-**Decision Space by FusionLoop AI** — an app that coaches you through making better decisions, then tracks whether they worked.
+**muii.app — Decision Space** — an app that coaches you through making better decisions, then tracks whether they worked. Built by FusionLoop AI.
 
 Built on Tony Robbins' OCEMR process plus Josh Holladay's additions. The flow:
 

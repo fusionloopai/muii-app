@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Metoxi — Decision Space by FusionLoop AI</title>
+<title>Muii — Decision Space</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Caveat:wght@500;600;700&display=swap');
@@ -248,7 +248,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
       </linearGradient>
     </defs>
   </svg>
-  <div class="brandname">Metoxi<small>Decision Space · FusionLoop AI</small></div>
+  <div class="brandname">Muii<small>Decision Space · muii.app</small></div>
   <div class="spacer"></div>
   <button class="btn btn-ghost btn-sm" onclick="exportJSON()"><i class="ph ph-download-simple"></i> Export</button>
   <button class="btn btn-ghost btn-sm" onclick="document.getElementById('importfile').click()"><i class="ph ph-upload-simple"></i> Import</button>
@@ -260,14 +260,14 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 
 <script>
 /* =====================================================================
-   Metoxi (Decision Space) — v1
+   Muii (muii.app) — Decision Space — v1
    The OOROCEMR flow, from Tony Robbins' OCEMR + Josh Holladay's notes:
    Outcomes → Reasons → Order → Options → Consequences → Evaluate →
    Mitigate → Resolve → Track.
    All data lives in the browser (localStorage) + JSON export/import.
    ===================================================================== */
 
-const STORE_KEY = 'metoxi-v1';
+const STORE_KEY = 'muii-v1';
 const uid = () => Math.random().toString(36).slice(2, 10);
 const today = () => new Date().toISOString().slice(0, 10);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -581,7 +581,7 @@ function renderWizard() {
   const bodyFns = [stepFrame, stepOutcomes, stepReasons, stepOrder, stepOptions, stepConsequences, stepEvaluate, stepMitigate, stepResolve];
   const gate = gateFor(d);
   return `
-  <a class="backlink" onclick="backToDash()"><i class="ph ph-arrow-left"></i> Metoxi</a>
+  <a class="backlink" onclick="backToDash()"><i class="ph ph-arrow-left"></i> Muii</a>
   <div class="wizwrap">
     <aside class="rail">${railHTML}</aside>
     <div>
@@ -1043,7 +1043,7 @@ function exportJSON() {
   const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `metoxi-backup-${today()}.json`;
+  a.download = `muii-backup-${today()}.json`;
   a.click();
   URL.revokeObjectURL(a.href);
   toast('Backup downloaded — your data, your file.');
@@ -1061,7 +1061,7 @@ function importJSON(ev) {
       s.trims = s.trims || [];
       state = s; save(); route = { view: 'dashboard', tab: 'track', decisionId: null }; render();
       toast('Imported. Welcome back.');
-    } catch (e) { toast('That file doesn’t look like a Metoxi backup.'); }
+    } catch (e) { toast('That file doesn’t look like a Muii backup.'); }
   };
   reader.readAsText(file);
   ev.target.value = '';

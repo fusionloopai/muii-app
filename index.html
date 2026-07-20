@@ -158,6 +158,7 @@ main{max-width:1180px;margin:0 auto;padding:clamp(20px,4vw,44px) clamp(16px,4vw,
 .info .tip b{color:var(--ink)}
 .reason-in{width:100%;border:1.5px solid var(--line-2);border-radius:var(--r-sm);padding:9px 12px;font-size:.92rem;background:var(--surface-3)}
 .reason-in:focus{background:var(--surface-3)}
+.line-edit{border:1.5px solid var(--line-2);border-radius:var(--r-xs);padding:6px 10px;background:var(--surface-3);width:100%;min-width:0;font-size:.95rem;color:var(--ink)}
 
 .optgrid{display:flex;flex-direction:column;gap:14px}
 .opt{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-md);padding:16px 18px;box-shadow:var(--shadow-sm)}
@@ -453,7 +454,7 @@ function renderTarget() {
         <div class="litem" draggable="true" data-id="${t.id}">
           <span class="grip"><i class="ph ph-dots-six-vertical"></i></span>
           <span class="rank">${i + 1}</span>
-          <span class="txt">${esc(t.text)}</span>
+          <input class="txt line-edit" type="text" value="${esc(t.text)}" oninput="upTargetText('${key}','${t.id}',this.value)">
           <button class="iconbtn danger" onclick="removeTarget('${key}','${t.id}')"><i class="ph ph-x"></i></button>
         </div>`).join('')}</div>`
     : `<p class="small" style="margin-top:14px">Nothing here yet — add one below.</p>`;
@@ -486,6 +487,10 @@ function addTarget(e, key) {
   if (v) { state.targets[key].push({ id: uid(), text: v }); save(); render(); }
   return false;
 }
+function upTargetText(key, id, v) {
+  const t = state.targets[key].find(x => x.id === id);
+  if (t) { t.text = v; save(); }
+}
 function removeTarget(key, id) {
   state.targets[key] = state.targets[key].filter(t => t.id !== id); save(); render();
 }
@@ -499,7 +504,10 @@ function renderTrim() {
     ${state.trims.length ? `<div class="list">${state.trims.map(t => `
       <div class="litem">
         <span class="grip" style="cursor:default"><i class="ph ph-scissors"></i></span>
-        <span class="txt">${esc(t.text)}${t.from ? `<span class="small" style="display:block">from “${esc(t.from)}” · ${t.date}</span>` : `<span class="small" style="display:block">${t.date}</span>`}</span>
+        <span class="txt" style="display:flex;flex-direction:column;gap:5px">
+          <input class="line-edit" type="text" value="${esc(t.text)}" oninput="upTrimText('${t.id}',this.value)">
+          <span class="small">${t.from ? `from “${esc(t.from)}” · ${t.date}` : t.date}</span>
+        </span>
         <button class="iconbtn danger" onclick="removeTrim('${t.id}')"><i class="ph ph-x"></i></button>
       </div>`).join('')}</div>` : '<p class="small" style="margin-top:14px">Nothing trimmed yet.</p>'}
     <form class="addrow" onsubmit="return addTrim(event)">
@@ -513,6 +521,10 @@ function addTrim(e) {
   const v = e.target.text.value.trim();
   if (v) { state.trims.unshift({ id: uid(), text: v, from: null, date: today() }); save(); render(); }
   return false;
+}
+function upTrimText(id, v) {
+  const t = state.trims.find(x => x.id === id);
+  if (t) { t.text = v; save(); }
 }
 function removeTrim(id) { state.trims = state.trims.filter(t => t.id !== id); save(); render(); }
 
@@ -683,7 +695,7 @@ function stepOutcomes(d) {
     ${d.outcomes.map(o => `
     <div class="ocard">
       <div class="row">
-        <span class="txt">${esc(o.text)}</span>
+        <input class="txt line-edit" type="text" value="${esc(o.text)}" oninput="upOutcomeText('${o.id}',this.value)">
         <span class="seg">
           <button class="${!o.horizon ? 'on unset' : ''}" onclick="setHorizon('${o.id}',null)">&mdash;</button>
           <button class="${o.horizon === 'now' ? 'on' : ''}" onclick="setHorizon('${o.id}','now')">Now</button>
@@ -718,6 +730,11 @@ function setHorizon(id, h) {
   const o = d.outcomes.find(x => x.id === id);
   if (o) { o.horizon = h; save(); render(); }
 }
+function upOutcomeText(id, v) {
+  const d = findD(route.decisionId);
+  const o = d.outcomes.find(x => x.id === id);
+  if (o) { o.text = v; save(); }
+}
 function removeOutcome(id) {
   const d = findD(route.decisionId);
   d.outcomes = d.outcomes.filter(o => o.id !== id); save(); render();
@@ -731,7 +748,7 @@ function stepReasons(d) {
   <div class="list">
     ${d.outcomes.map(o => `
     <div class="ocard">
-      <div class="row"><span class="txt">${esc(o.text)}</span>
+      <div class="row"><input class="txt line-edit" type="text" value="${esc(o.text)}" oninput="upOutcomeText('${o.id}',this.value)">
         ${horizonPill(o)}</div>
       <input class="reason-in" type="text" value="${esc(o.reason)}" placeholder="Because… (joy? freedom? security? growth? who it serves?)" oninput="upReason('${o.id}',this.value)">
     </div>`).join('')}
@@ -753,7 +770,10 @@ function stepOrder(d) {
     <div class="litem" draggable="true" data-id="${o.id}">
       <span class="grip"><i class="ph ph-dots-six-vertical"></i></span>
       <span class="rank" ${i === 0 ? 'style="color:var(--fl-magenta)"' : ''}>${i + 1}</span>
-      <span class="txt">${esc(o.text)}${o.reason ? `<span class="small" style="display:block">${esc(o.reason)}</span>` : ''}</span>
+      <span class="txt" style="display:flex;flex-direction:column;gap:5px">
+        <input class="line-edit" type="text" value="${esc(o.text)}" oninput="upOutcomeText('${o.id}',this.value)">
+        ${o.reason ? `<span class="small">${esc(o.reason)}</span>` : ''}
+      </span>
       ${horizonPill(o)}
     </div>`).join('')}
   </div>
@@ -779,7 +799,10 @@ function stepOptions(d) {
     <div class="litem" draggable="true" data-id="${o.id}">
       <span class="grip"><i class="ph ph-dots-six-vertical"></i></span>
       <span class="rank">${String.fromCharCode(65 + i)}</span>
-      <span class="txt">${esc(o.text)}${o.hybrid ? ' <span class="hybrid-tag">Hybrid</span>' : ''}</span>
+      <span class="txt" style="display:flex;align-items:center;gap:8px">
+        <input class="line-edit" style="flex:1" type="text" value="${esc(o.text)}" oninput="upOptionText('${o.id}',this.value)">
+        ${o.hybrid ? '<span class="hybrid-tag">Hybrid</span>' : ''}
+      </span>
       <button class="iconbtn danger" onclick="removeOption('${o.id}')"><i class="ph ph-x"></i></button>
     </div>`).join('')}
   </div>`;
@@ -793,6 +816,11 @@ function addOption(e, extra) {
     save(); render(); focusFirst();
   }
   return false;
+}
+function upOptionText(id, v) {
+  const d = findD(route.decisionId);
+  const o = d.options.find(x => x.id === id);
+  if (o) { o.text = v; save(); }
 }
 function removeOption(id) {
   const d = findD(route.decisionId);
@@ -831,8 +859,13 @@ function stepConsequences(d) {
   </div>`;
 }
 function conHTML(oid, side, c) {
-  return `<div class="con"><span class="txt">${esc(c.text)}</span>
+  return `<div class="con"><input class="txt line-edit" type="text" value="${esc(c.text)}" oninput="upConText('${oid}','${side}','${c.id}',this.value)">
     <button class="iconbtn danger" style="width:26px;height:26px" onclick="removeCon('${oid}','${side}','${c.id}')"><i class="ph ph-x"></i></button></div>`;
+}
+function upConText(oid, side, cid, v) {
+  const d = findD(route.decisionId);
+  const c = d.options.find(x => x.id === oid)[side].find(x => x.id === cid);
+  if (c) { c.text = v; save(); }
 }
 function addCon(e, oid, side) {
   e.preventDefault();
@@ -1023,7 +1056,10 @@ function wireDrag() {
   document.querySelectorAll('[data-drag]').forEach(listEl => {
     let dragging = null;
     listEl.querySelectorAll('.litem[draggable]').forEach(item => {
-      item.addEventListener('dragstart', e => { dragging = item; item.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+      item.addEventListener('dragstart', e => {
+        if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) { e.preventDefault(); return; }
+        dragging = item; item.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move';
+      });
       item.addEventListener('dragend', () => { if (dragging) dragging.classList.remove('dragging'); dragging = null; commitOrder(listEl); });
     });
     listEl.addEventListener('dragover', e => {

@@ -150,6 +150,10 @@ main{max-width:1180px;margin:0 auto;padding:clamp(20px,4vw,44px) clamp(16px,4vw,
 .seg{display:inline-flex;border:1.5px solid var(--line-2);border-radius:var(--r-pill);overflow:hidden;flex:none}
 .seg button{padding:5px 13px;font-size:.78rem;font-weight:600;color:var(--ink-3)}
 .seg button.on{background:var(--ink);color:var(--surface)}
+.info{position:relative;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--ink-4);color:var(--ink-3);font:700 .68rem/1 var(--font-display);cursor:help;vertical-align:middle;margin-left:6px}
+.info .tip{display:none;position:absolute;bottom:24px;left:50%;transform:translateX(-50%);width:290px;background:var(--surface-3);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:12px 14px;font:400 .82rem/1.55 var(--font-body);color:var(--ink-2);box-shadow:var(--shadow-lg);z-index:20;text-align:left;text-transform:none;letter-spacing:0}
+.info:hover .tip,.info:focus .tip{display:block}
+.info .tip b{color:var(--ink)}
 .reason-in{width:100%;border:1.5px solid var(--line-2);border-radius:var(--r-sm);padding:9px 12px;font-size:.92rem;background:var(--surface-3)}
 .reason-in:focus{background:var(--surface-3)}
 
@@ -667,7 +671,7 @@ const OUTCOME_PROMPTS = ['An experience I want', 'A thing I want', 'Who I want a
 function stepOutcomes(d) {
   return `
   <h2 class="h2">What do you want?</h2>
-  <span class="small">Every outcome you’re hoping this decision serves. Mark each one Now (this season) or Later (the horizon).</span>
+  <span class="small">Every outcome you’re hoping this decision serves. Tag each one Now, Next, or Later.<span class="info" tabindex="0">i<span class="tip"><b>Now</b> — the priority. What this season of your life needs handled.<br><b>Next</b> — the transition. What you’re building toward once Now is taken care of.<br><b>Later</b> — the long game. The big dreams you’re keeping alive on purpose.</span></span></span>
   <div class="chips">${OUTCOME_PROMPTS.map(p => `<button class="chip" onclick="promptOutcome('${esc(p)}')">${p}</button>`).join('')}</div>
   <form class="bigadd" onsubmit="return addOutcome(event)">
     <input type="text" name="text" id="outcome-in" placeholder="I want…">
@@ -679,7 +683,8 @@ function stepOutcomes(d) {
       <div class="row">
         <span class="txt">${esc(o.text)}</span>
         <span class="seg">
-          <button class="${o.horizon !== 'later' ? 'on' : ''}" onclick="setHorizon('${o.id}','now')">Now</button>
+          <button class="${o.horizon !== 'later' && o.horizon !== 'next' ? 'on' : ''}" onclick="setHorizon('${o.id}','now')">Now</button>
+          <button class="${o.horizon === 'next' ? 'on' : ''}" onclick="setHorizon('${o.id}','next')">Next</button>
           <button class="${o.horizon === 'later' ? 'on' : ''}" onclick="setHorizon('${o.id}','later')">Later</button>
         </span>
         <button class="iconbtn danger" onclick="removeOutcome('${o.id}')"><i class="ph ph-x"></i></button>
@@ -701,6 +706,10 @@ function addOutcome(e) {
   }
   return false;
 }
+function horizonPill(o) {
+  const h = o.horizon === 'later' ? ['pill-big', 'Later'] : o.horizon === 'next' ? ['pill-open', 'Next'] : ['pill-little', 'Now'];
+  return `<span class="pill ${h[0]}">${h[1]}</span>`;
+}
 function setHorizon(id, h) {
   const d = findD(route.decisionId);
   const o = d.outcomes.find(x => x.id === id);
@@ -720,7 +729,7 @@ function stepReasons(d) {
     ${d.outcomes.map(o => `
     <div class="ocard">
       <div class="row"><span class="txt">${esc(o.text)}</span>
-        <span class="pill ${o.horizon === 'later' ? 'pill-big' : 'pill-little'}">${o.horizon === 'later' ? 'Later' : 'Now'}</span></div>
+        ${horizonPill(o)}</div>
       <input class="reason-in" type="text" value="${esc(o.reason)}" placeholder="Because… (joy? freedom? security? growth? who it serves?)" oninput="upReason('${o.id}',this.value)">
     </div>`).join('')}
   </div>`;
@@ -742,7 +751,7 @@ function stepOrder(d) {
       <span class="grip"><i class="ph ph-dots-six-vertical"></i></span>
       <span class="rank" ${i === 0 ? 'style="color:var(--fl-magenta)"' : ''}>${i + 1}</span>
       <span class="txt">${esc(o.text)}${o.reason ? `<span class="small" style="display:block">${esc(o.reason)}</span>` : ''}</span>
-      <span class="pill ${o.horizon === 'later' ? 'pill-big' : 'pill-little'}">${o.horizon === 'later' ? 'Later' : 'Now'}</span>
+      ${horizonPill(o)}
     </div>`).join('')}
   </div>
   ${d.outcomes.length > 1 ? `<p class="small" style="margin-top:14px"><i class="ph ph-lightbulb"></i> Be rigorous — you can’t make everybody happy, a million dollars, and free time all from one decision. Which one wins?</p>` : ''}`;

@@ -266,7 +266,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 <body>
 
 <header class="topbar">
-  <svg class="mark" viewBox="0 0 197 203" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="FusionLoop">
+  <svg class="mark" style="cursor:pointer" onclick="backToDash()" viewBox="0 0 197 203" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="FusionLoop">
     <path d="M36.0136 0.501282C36.0137 29.3604 59.4091 52.7553 88.2684 52.7553H196.902V88.5081H88.2684L87.131 88.5014C39.4287 87.8973 0.87267 49.341 0.268336 1.63865L0.260742 0.501282H36.0136Z" fill="url(#g1)"></path>
     <path d="M136.398 150.139H88.2686C59.4093 150.139 36.0138 173.535 36.0138 202.394H0.260986C0.260993 154.168 39.0502 115.003 87.1313 114.394L88.2686 114.386H136.398V150.139Z" fill="url(#g2)"></path>
     <defs>
@@ -278,8 +278,9 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
       </linearGradient>
     </defs>
   </svg>
-  <div class="brandname">Muii<small>Decision Space · muii.app</small></div>
+  <div class="brandname" style="cursor:pointer" onclick="backToDash()">Muii<small>Decision Space · muii.app</small></div>
   <div class="spacer"></div>
+  <button class="btn btn-ghost btn-sm" onclick="backToDash()"><i class="ph ph-squares-four"></i> Decision Dashboard</button>
   <button class="btn btn-ghost btn-sm" id="theme-toggle" onclick="toggleTheme()" title="Switch between light and dark"><i class="ph ph-sun"></i> Light</button>
   <button class="btn btn-ghost btn-sm" onclick="exportJSON()"><i class="ph ph-download-simple"></i> Export</button>
   <button class="btn btn-ghost btn-sm" onclick="document.getElementById('importfile').click()"><i class="ph ph-upload-simple"></i> Import</button>
